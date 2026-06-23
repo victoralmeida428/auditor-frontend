@@ -60,16 +60,24 @@ export interface CategoriaEnsaio {
 
 export interface EquipamentoCritico {
   id: number
+  empresa_id?: number
   nome: string
   modelo: string | null
   identificacao_interna: string | null
+  ativo?: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export interface Signatario {
   id: number
+  empresa_id?: number
   nome: string
   cargo: string | null
   ensaios_autorizados: string[]
+  ativo?: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export const useEscopoStore = defineStore('escopo', () => {
@@ -170,30 +178,58 @@ export const useEscopoStore = defineStore('escopo', () => {
     return res.data
   }
 
-  async function listEquipamentos(escopoId: number) {
-    const res = await api.get(`/escopo/${escopoId}/equipamentos`)
+  async function listEquipamentos() {
+    const res = await api.get('/equipamentos')
     equipamentos.value = res.data
     return res.data
   }
 
-  async function createEquipamento(escopoId: number, data: Partial<EquipamentoCritico>) {
-    const res = await api.post(`/escopo/${escopoId}/equipamentos`, data)
+  async function createEquipamento(data: Partial<EquipamentoCritico>) {
+    const res = await api.post('/equipamentos', data)
     return res.data as EquipamentoCritico
+  }
+
+  async function listEquipamentosByEscopo(escopoId: number) {
+    const res = await api.get(`/escopo/${escopoId}/equipamentos`)
+    return res.data as EquipamentoCritico[]
+  }
+
+  async function linkEquipamentoToEscopo(escopoId: number, equipamentoId: number) {
+    const res = await api.post(`/escopo/${escopoId}/equipamentos`, { equipamento_id: equipamentoId })
+    return res.data
+  }
+
+  async function unlinkEquipamentoFromEscopo(escopoId: number, equipamentoId: number) {
+    await api.delete(`/escopo/${escopoId}/equipamentos/${equipamentoId}`)
   }
 
   async function deleteEquipamento(id: number) {
     await api.delete(`/equipamentos/${id}`)
   }
 
-  async function listSignatarios(escopoId: number) {
-    const res = await api.get(`/escopo/${escopoId}/signatarios`)
+  async function listSignatarios() {
+    const res = await api.get('/signatarios')
     signatarios.value = res.data
     return res.data
   }
 
-  async function createSignatario(escopoId: number, data: Partial<Signatario>) {
-    const res = await api.post(`/escopo/${escopoId}/signatarios`, data)
+  async function createSignatario(data: Partial<Signatario>) {
+    const res = await api.post('/signatarios', data)
     return res.data as Signatario
+  }
+
+  async function listSignatariosByEscopo(escopoId: number) {
+    const res = await api.get(`/escopo/${escopoId}/signatarios`)
+    return res.data as Signatario[]
+  }
+
+  async function linkSignatarioToEscopo(escopoId: number, signatarioId: number) {
+    const res = await api.post(`/escopo/${escopoId}/signatarios`, { signatario_id: signatarioId })
+    return res.data
+  }
+
+  async function unlinkSignatarioFromEscopo(escopoId: number, signatarioId: number) {
+    await api.delete(`/escopo/${escopoId}/signatarios/${signatarioId}`)
   }
 
   async function deleteSignatario(id: number) {
@@ -215,7 +251,9 @@ export const useEscopoStore = defineStore('escopo', () => {
     listMetodos, createMetodo, deleteMetodo,
     listCategoriasEnsaio,
     listEquipamentos, createEquipamento, deleteEquipamento,
+    listEquipamentosByEscopo, linkEquipamentoToEscopo, unlinkEquipamentoFromEscopo,
     listSignatarios, createSignatario, deleteSignatario,
+    listSignatariosByEscopo, linkSignatarioToEscopo, unlinkSignatarioFromEscopo,
     listPrincipiosAnaliticos,
   }
 })

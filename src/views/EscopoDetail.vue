@@ -1,25 +1,129 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useEscopoStore, type Escopo, type Ensaio } from '@/stores/escopoStore'
+import { useEscopoStore, type Escopo, type Ensaio, type EquipamentoCritico, type Signatario } from '@/stores/escopoStore'
+import { useToast } from 'primevue/usetoast'
 
 const route = useRoute()
 const router = useRouter()
 const store = useEscopoStore()
+const toast = useToast()
 
 const escopo = ref<Escopo | null>(null)
 const ensaios = ref<Ensaio[]>([])
+const equipamentos = ref<EquipamentoCritico[]>([])
+const todosEquipamentos = ref<EquipamentoCritico[]>([])
+const signatarios = ref<Signatario[]>([])
+const todosSignatarios = ref<Signatario[]>([])
 const loading = ref(true)
+
+const linkingEquip = ref(false)
+const selectedEquipamentos = ref<EquipamentoCritico[]>([])
+
+const linkingSignatario = ref(false)
+const selectedSignatarios = ref<Signatario[]>([])
 
 onMounted(async () => {
   const id = Number(route.params.id)
   try {
     escopo.value = await store.getEscopo(id)
     ensaios.value = await store.listEnsaios(id)
+    await Promise.all([loadEquipamentos(), loadSignatarios()])
   } finally {
     loading.value = false
   }
 })
+
+async function loadEquipamentos() {
+  const id = Number(route.params.id)
+  try {
+    const [vinculados, todos] = await Promise.all([
+      store.listEquipamentosByEscopo(id),
+      store.listEquipamentos(),
+    ])
+    equipamentos.value = vinculados ?? []
+    todosEquipamentos.value = todos ?? []
+    selectedEquipamentos.value = [...(vinculados ?? [])]
+  } catch (e: any) {
+    console.error('loadEquipamentos error:', e)
+  }
+}
+
+async function handleLinkEquipamentos() {
+  if (!escopo.value) return
+  linkingEquip.value = true
+  try {
+    const vinculadosIds = new Set(equipamentos.value.map(e => e.id))
+    const selecionadosIds = new Set(selectedEquipamentos.value.map(e => e.id))
+
+    const add = selectedEquipamentos.value.filter(e => !vinculadosIds.has(e.id))
+    const remove = equipamentos.value.filter(e => !selecionadosIds.has(e.id))
+
+    await Promise.all([
+      ...add.map(e => store.linkEquipamentoToEscopo(escopo.value!.id, e.id)),
+      ...remove.map(e => store.unlinkEquipamentoFromEscopo(escopo.value!.id, e.id)),
+    ])
+
+    equipamentos.value = [...selectedEquipamentos.value]
+    toast.add({ severity: 'success', summary: 'Equipamentos vinculados', life: 2000 })
+  } catch (e: any) {
+    console.error('handleLinkEquipamentos error:', e)
+    toast.add({ severity: 'error', summary: 'Erro ao vincular equipamentos', life: 3000 })
+  } finally {
+    linkingEquip.value = false
+  }
+}
+
+async function loadSignatarios() {
+  const id = Number(route.params.id)
+  try {
+    const [vinculados, todos] = await Promise.all([
+      store.listSignatariosByEscopo(id),
+      store.listSignatarios(),
+    ])
+    signatarios.value = vinculados ?? []
+    todosSignatarios.value = todos ?? []
+    selectedSignatarios.value = [...(vinculados ?? [])]
+  } catch (e: any) {
+    console.error('loadSignatarios error:', e)
+  }
+}
+
+async function handleLinkSignatarios() {
+  if (!escopo.value) return
+  linkingSignatario.value = true
+  try {
+    const vinculadosIds = new Set(signatarios.value.map(s => s.id))
+    const selecionadosIds = new Set(selectedSignatarios.value.map(s => s.id))
+
+    const add = selectedSignatarios.value.filter(s => !vinculadosIds.has(s.id))
+    const remove = signatarios.value.filter(s => !selecionadosIds.has(s.id))
+
+    await Promise.all([
+      ...add.map(s => store.linkSignatarioToEscopo(escopo.value!.id, s.id)),
+      ...remove.map(s => store.unlinkSignatarioFromEscopo(escopo.value!.id, s.id)),
+    ])
+
+    signatarios.value = [...selectedSignatarios.value]
+    toast.add({ severity: 'success', summary: 'Signatários vinculados', life: 2000 })
+  } catch (e: any) {
+    console.error('handleLinkSignatarios error:', e)
+    toast.add({ severity: 'error', summary: 'Erro ao vincular signatários', life: 3000 })
+  } finally {
+    linkingSignatario.value = false
+  }
+}
+
+async function handleDeleteSignatario(id: number) {
+  try {
+    await store.deleteSignatario(id)
+    signatarios.value = signatarios.value.filter(s => s.id !== id)
+    selectedSignatarios.value = selectedSignatarios.value.filter(s => s.id !== id)
+    toast.add({ severity: 'success', summary: 'Signatário removido', life: 2000 })
+  } catch {
+    toast.add({ severity: 'error', summary: 'Erro ao remover signatário', life: 3000 })
+  }
+}
 </script>
 
 <template>
@@ -55,10 +159,12 @@ onMounted(async () => {
     </div>
 
     <div>
-      <h2 class="text-lg font-medium m-0 mb-2">Ensaios ({{ ensaios.length }})</h2>
+      <h2 class="text-lg font-medium m-0 mb-2">Ensaios ({{ (ensaios?.length ?? 0) }})</h2>
       <DataTable :value="ensaios" striped-rows paginator :rows="10">
         <Column field="nome" header="Nome" sortable />
-        <Column field="matriz" header="Matriz" sortable />
+        <Column header="Matriz" sortable>
+          <template #body="{ data }">{{ data.matriz || '-' }}</template>
+        </Column>
         <Column field="tipo_metodo" header="Tipo Método">
           <template #body="{ data }">
             <Tag :value="data.tipo_metodo || '-'" :severity="data.tipo_metodo === 'normalizado' ? 'success' : 'warn'" />
@@ -68,6 +174,79 @@ onMounted(async () => {
           <template #body="{ data }">
             <Tag :value="data.acreditado ? 'Sim' : 'Não'" :severity="data.acreditado ? 'success' : 'secondary'" />
           </template>
+        </Column>
+      </DataTable>
+    </div>
+
+    <div>
+      <div class="flex align-items-center justify-content-between mb-2">
+        <h2 class="text-lg font-medium m-0">Equipamentos Críticos ({{ equipamentos?.length ?? 0 }})</h2>
+        <div class="flex gap-2">
+          <Button label="Gerenciar" icon="pi pi-cog" size="small" severity="secondary" @click="router.push('/equipamentos')" />
+        </div>
+      </div>
+
+      <div class="card p-3 surface-ground border-round mb-2">
+        <label class="block mb-1 text-sm font-medium">Vincular Equipamentos</label>
+        <div v-if="todosEquipamentos.length === 0" class="text-color-secondary text-sm mb-2">
+          Nenhum equipamento cadastrado.
+          <router-link to="/equipamentos">Cadastre equipamentos primeiro</router-link>.
+        </div>
+        <div v-else class="flex gap-2">
+          <MultiSelect
+            v-model="selectedEquipamentos"
+            :options="todosEquipamentos"
+            option-label="nome"
+            :maxSelectedLabels="3"
+            placeholder="Selecione os equipamentos..."
+            class="w-full"
+            filter
+          />
+          <Button label="Salvar" icon="pi pi-check" :loading="linkingEquip" @click="handleLinkEquipamentos" />
+        </div>
+      </div>
+
+      <DataTable :value="equipamentos" striped-rows>
+        <Column field="nome" header="Nome" sortable />
+        <Column field="modelo" header="Modelo">
+          <template #body="{ data }">{{ data.modelo || '-' }}</template>
+        </Column>
+        <Column field="identificacao_interna" header="Identificação Interna">
+          <template #body="{ data }">{{ data.identificacao_interna || '-' }}</template>
+        </Column>
+      </DataTable>
+    </div>
+
+    <div>
+      <div class="flex align-items-center justify-content-between mb-2">
+        <h2 class="text-lg font-medium m-0">Equipe Técnica ({{ (signatarios?.length ?? 0) }})</h2>
+        <Button label="Gerenciar" icon="pi pi-cog" size="small" severity="secondary" @click="router.push('/signatarios')" />
+      </div>
+
+      <div class="card p-3 surface-ground border-round mb-2">
+        <label class="block mb-1 text-sm font-medium">Vincular Signatários</label>
+        <div v-if="todosSignatarios.length === 0" class="text-color-secondary text-sm mb-2">
+          Nenhum signatário cadastrado.
+          <router-link to="/signatarios">Cadastre a equipe primeiro</router-link>.
+        </div>
+        <div v-else class="flex gap-2">
+          <MultiSelect
+            v-model="selectedSignatarios"
+            :options="todosSignatarios"
+            option-label="nome"
+            :maxSelectedLabels="3"
+            placeholder="Selecione os signatários..."
+            class="w-full"
+            filter
+          />
+          <Button label="Salvar" icon="pi pi-check" :loading="linkingSignatario" @click="handleLinkSignatarios" />
+        </div>
+      </div>
+
+      <DataTable :value="signatarios" striped-rows>
+        <Column field="nome" header="Nome" sortable />
+        <Column field="cargo" header="Cargo">
+          <template #body="{ data }">{{ data.cargo || '-' }}</template>
         </Column>
       </DataTable>
     </div>

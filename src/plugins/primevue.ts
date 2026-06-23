@@ -14,6 +14,8 @@ import Select from 'primevue/select'
 import Checkbox from 'primevue/checkbox'
 import FileUpload from 'primevue/fileupload'
 import Badge from 'primevue/badge'
+import Dialog from 'primevue/dialog'
+import MultiSelect from 'primevue/multiselect'
 import Tooltip from 'primevue/tooltip'
 
 export function registerPrimeVueComponents(app: App) {
@@ -32,5 +34,7 @@ export function registerPrimeVueComponents(app: App) {
   app.component('Checkbox', Checkbox)
   app.component('FileUpload', FileUpload)
   app.component('Badge', Badge)
+  app.component('Dialog', Dialog)
+  app.component('MultiSelect', MultiSelect)
   app.directive('tooltip', Tooltip)
 }

@@ -47,6 +47,18 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/equipamentos',
+      name: 'equipamentos',
+      component: () => import('@/views/EquipamentosView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/signatarios',
+      name: 'signatarios',
+      component: () => import('@/views/SignatariosView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/documentos',
       name: 'documentos',
       component: () => import('@/views/DocumentosView.vue'),
