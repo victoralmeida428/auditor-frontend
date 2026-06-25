@@ -1,0 +1,5 @@
+# Proxy de API para o backend
+/api/*  https://api.inorma.com.br/api/*  200
+
+# SPA fallback: todas as rotas servem index.html
+/*  /index.html  200

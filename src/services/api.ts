@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/authStore'
 import router from '@/router'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -41,6 +41,21 @@ api.interceptors.response.use(
     const originalRequest = error.config
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (
+        originalRequest.url?.includes('/auth/login') ||
+        originalRequest.url?.includes('/auth/register')
+      ) {
+        return Promise.reject(error)
+      }
+
+      const authStore = useAuthStore()
+
+      if (!authStore.refreshToken) {
+        authStore.logout()
+        router.push('/login')
+        return Promise.reject(error)
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
@@ -52,8 +67,6 @@ api.interceptors.response.use(
 
       originalRequest._retry = true
       isRefreshing = true
-
-      const authStore = useAuthStore()
 
       try {
         const response = await axios.post('/api/auth/refresh', {

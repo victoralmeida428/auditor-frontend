@@ -36,7 +36,7 @@ async function handleRegister() {
     <div class="w-full" style="max-width: 32rem">
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
         <div class="text-center mb-6">
-          <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-norma-600 text-xl font-bold text-white mb-4">A</span>
+          <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-norma-600 text-xl font-bold text-white mb-4">iNorma</span>
           <h1 class="text-xl font-bold text-gray-900">Cadastro</h1>
           <p class="text-gray-500 mt-1 text-sm">Crie sua empresa e conta de administrador</p>
         </div>

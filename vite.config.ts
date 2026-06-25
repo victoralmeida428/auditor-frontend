@@ -5,8 +5,12 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
 
-export default defineConfig({
-  plugins: [tailwindcss(), vue(), vueDevTools()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    tailwindcss(),
+    vue(),
+    mode === 'development' && vueDevTools(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -21,4 +25,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

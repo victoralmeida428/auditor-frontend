@@ -1,0 +1,7 @@
+name = "auditor-inorma"
+compatibility_date = "2025-06-01"
+pages_build_output_dir = "dist"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+vars = { API_URL = "https://api.inorma.com.br" }
