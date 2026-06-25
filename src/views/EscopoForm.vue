@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useEscopoStore } from '@/stores/escopoStore'
 import { useToast } from 'primevue/usetoast'
+import NormaSuggestionList from '@/components/norma/NormaSuggestionList.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -14,6 +15,7 @@ const escopoId = computed(() => Number(route.params.id))
 
 const step = ref(0)
 const loading = ref(false)
+const savingNormas = ref(false)
 const error = ref('')
 
 const form = ref({
@@ -70,6 +72,49 @@ function removeEnsaio(index: number) {
   pendingEnsaios.value.splice(index, 1)
 }
 
+// Sugestão de normas
+const normasSugeridas = ref<any[]>([])
+const selectedNormaIds = ref<number[]>([])
+const loadingSugestao = ref(false)
+
+async function loadSugestoes() {
+  loadingSugestao.value = true
+  try {
+    const inlineData = {
+      escopo: {
+        nome: form.value.nome,
+        descricao: form.value.descricao,
+        areas_atuacao: form.value.areas_atuacao,
+      },
+      ensaios: pendingEnsaios.value.map((e: any) => ({
+        nome: e.nome,
+        matriz: e.matriz,
+        tipo_metodo: e.tipo_metodo,
+        principio: '',
+        acreditado: e.acreditado,
+      })),
+    }
+    const result = await store.sugerirNormas(escopoId.value || 0, inlineData)
+    normasSugeridas.value = result.sugeridas
+    selectedNormaIds.value = result.vinculadas || []
+
+    if (result.vinculadas.length === 0 && result.sugeridas.length > 0) {
+      selectedNormaIds.value = result.sugeridas.map((n: any) => n.id)
+    }
+  } catch (e: any) {
+    toast.add({ severity: 'warn', summary: 'Não foi possível obter sugestões', detail: 'Você pode vincular normas manualmente depois.', life: 4000 })
+  } finally {
+    loadingSugestao.value = false
+  }
+}
+
+function onStepChange(newStep: number) {
+  step.value = newStep
+  if (newStep === 2 && normasSugeridas.value.length === 0) {
+    loadSugestoes()
+  }
+}
+
 async function handleSubmit() {
   error.value = ''
   loading.value = true
@@ -82,12 +127,18 @@ async function handleSubmit() {
 
     if (isEditing.value) {
       await store.updateEscopo(escopoId.value, payload)
+      if (selectedNormaIds.value.length > 0) {
+        await store.saveNormasSelecionadas(escopoId.value, selectedNormaIds.value)
+      }
       toast.add({ severity: 'success', summary: 'Escopo atualizado', life: 2000 })
-      router.push('/escopo')
+      router.push(`/escopo/${escopoId.value}`)
     } else {
       const created = await store.createEscopo(payload)
       for (const e of pendingEnsaios.value) {
         await store.createEnsaio(created.id, e)
+      }
+      if (selectedNormaIds.value.length > 0) {
+        await store.saveNormasSelecionadas(created.id, selectedNormaIds.value)
       }
       toast.add({ severity: 'success', summary: 'Escopo criado com sucesso', life: 2000 })
       router.push(`/escopo/${created.id}`)
@@ -99,14 +150,14 @@ async function handleSubmit() {
   }
 }
 
-const steps = ['Dados Básicos', 'Ensaios', 'Revisão']
+const steps = ['Dados Básicos', 'Ensaios', 'Sugestão de Normas', 'Revisão']
 </script>
 
 <template>
-  <div class="flex flex-column gap-4" style="max-width: 50rem">
-    <h1 class="text-xl font-bold m-0">{{ isEditing ? 'Editar Escopo' : 'Novo Escopo' }}</h1>
+  <div class="flex flex-column gap-6" style="max-width: 50rem">
+    <h1 class="text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Escopo' : 'Novo Escopo' }}</h1>
 
-    <Steps :model="steps.map(s => ({ label: s }))" :active-step="step" class="mb-2" />
+    <Steps :model="steps.map(s => ({ label: s }))" :active-step="step" class="mb-2" @update:active-step="onStepChange" />
 
     <!-- Step 0: Dados Básicos -->
     <div v-if="step === 0" class="flex flex-column gap-3">
@@ -141,7 +192,7 @@ const steps = ['Dados Básicos', 'Ensaios', 'Revisão']
     <!-- Step 1: Ensaios -->
     <div v-if="step === 1">
       <div class="flex flex-column gap-3">
-        <h2 class="text-lg font-medium m-0">Ensaios</h2>
+        <h2 class="text-base font-semibold m-0">Ensaios</h2>
 
         <div class="grid formgrid">
           <div class="col-6">
@@ -210,10 +261,32 @@ const steps = ['Dados Básicos', 'Ensaios', 'Revisão']
       </div>
     </div>
 
-    <!-- Step 2: Revisão -->
-    <div v-if="step === 2" class="flex flex-column gap-3">
-      <h2 class="text-lg font-medium m-0">Revisão</h2>
-      <div class="card surface-ground p-3 border-round">
+    <!-- Step 2: Sugestão de Normas -->
+    <div v-if="step === 2">
+      <div class="flex flex-column gap-3">
+        <h2 class="text-base font-semibold m-0">Sugestão de Itens da Norma</h2>
+        <p class="text-sm text-gray-500 mt-1">
+          Com base nos dados do escopo e ensaios, a IA sugere os itens mais relevantes da ISO 17025.
+          Selecione os que deseja vincular.
+        </p>
+
+        <NormaSuggestionList
+          :normas="normasSugeridas"
+          :selected-ids="selectedNormaIds"
+          :loading="loadingSugestao"
+          @update:selected-ids="selectedNormaIds = $event"
+        />
+
+        <div v-if="!loadingSugestao && normasSugeridas.length > 0" class="text-sm text-gray-500">
+          {{ selectedNormaIds.length }} de {{ normasSugeridas.length }} selecionados
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Revisão -->
+    <div v-if="step === 3" class="flex flex-column gap-3">
+      <h2 class="text-base font-semibold m-0">Revisão</h2>
+      <div class="card bg-white rounded-xl border border-gray-100 shadow-sm p-3 border-round">
         <div class="grid">
           <div class="col-6"><strong>Nome:</strong> {{ form.nome }}</div>
           <div class="col-6"><strong>Descrição:</strong> {{ form.descricao || '-' }}</div>
@@ -226,6 +299,15 @@ const steps = ['Dados Básicos', 'Ensaios', 'Revisão']
         <Column field="nome" header="Nome" />
         <Column field="matriz" header="Matriz" />
       </DataTable>
+      <h3 class="text-md font-medium m-0">Itens da Norma ({{ selectedNormaIds.length }})</h3>
+      <div class="flex flex-wrap gap-2">
+        <Tag
+          v-for="n in normasSugeridas.filter(n => selectedNormaIds.includes(n.id))"
+          :key="n.id"
+          :value="`${n.requisito_codigo} ${n.item_requisito || ''}`"
+          severity="info"
+        />
+      </div>
       <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
     </div>
 
@@ -235,7 +317,7 @@ const steps = ['Dados Básicos', 'Ensaios', 'Revisão']
       </div>
       <div class="flex gap-2">
         <Button type="button" label="Cancelar" severity="secondary" @click="router.push('/escopo')" />
-        <Button v-if="step < steps.length - 1" label="Próximo" icon="pi pi-chevron-right" icon-pos="right" @click="step++" />
+        <Button v-if="step < steps.length - 1" label="Próximo" icon="pi pi-chevron-right" icon-pos="right" @click="onStepChange(step + 1)" />
         <Button v-else :loading="loading" label="Salvar" icon="pi pi-check" @click="handleSubmit" />
       </div>
     </div>

@@ -17,6 +17,10 @@ import Badge from 'primevue/badge'
 import Dialog from 'primevue/dialog'
 import MultiSelect from 'primevue/multiselect'
 import Tooltip from 'primevue/tooltip'
+import Accordion from 'primevue/accordion'
+import AccordionTab from 'primevue/accordiontab'
+import Calendar from 'primevue/calendar'
+import InputNumber from 'primevue/inputnumber'
 
 export function registerPrimeVueComponents(app: App) {
   app.component('Button', Button)
@@ -36,5 +40,9 @@ export function registerPrimeVueComponents(app: App) {
   app.component('Badge', Badge)
   app.component('Dialog', Dialog)
   app.component('MultiSelect', MultiSelect)
+  app.component('Accordion', Accordion)
+  app.component('AccordionTab', AccordionTab)
+  app.component('Calendar', Calendar)
+  app.component('InputNumber', InputNumber)
   app.directive('tooltip', Tooltip)
 }

@@ -54,30 +54,32 @@ async function handleDelete(id: number) {
 </script>
 
 <template>
-  <div class="flex flex-column gap-4">
+  <div class="flex flex-column gap-6">
     <div class="flex align-items-center justify-content-between">
-      <h1 class="text-xl font-bold m-0">Equipamentos</h1>
-      <Button label="Novo Equipamento" icon="pi pi-plus" @click="showDialog = true" />
+      <h1 class="text-xl font-bold text-gray-900">Equipamentos</h1>
+      <Button label="Novo Equipamento" icon="pi pi-plus" size="small" @click="showDialog = true" />
     </div>
 
     <div v-if="loading" class="flex justify-content-center">
       <i class="pi pi-spin pi-spinner text-3xl" />
     </div>
 
-    <DataTable v-else :value="equipamentos" striped-rows paginator :rows="15">
-      <Column field="nome" header="Nome" sortable />
-      <Column field="modelo" header="Modelo">
-        <template #body="{ data }">{{ data.modelo || '-' }}</template>
-      </Column>
-      <Column field="identificacao_interna" header="Identificação Interna">
-        <template #body="{ data }">{{ data.identificacao_interna || '-' }}</template>
-      </Column>
-      <Column header="" style="width: 4rem">
-        <template #body="{ data }">
-          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data.id)" />
-        </template>
-      </Column>
-    </DataTable>
+    <div v-else class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <DataTable :value="equipamentos" striped-rows paginator :rows="15">
+        <Column field="nome" header="Nome" sortable />
+        <Column field="modelo" header="Modelo">
+          <template #body="{ data }">{{ data.modelo || '-' }}</template>
+        </Column>
+        <Column field="identificacao_interna" header="Identificação Interna">
+          <template #body="{ data }">{{ data.identificacao_interna || '-' }}</template>
+        </Column>
+        <Column header="" style="width: 4rem">
+          <template #body="{ data }">
+            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data.id)" />
+          </template>
+        </Column>
+      </DataTable>
+    </div>
 
     <Dialog v-model:visible="showDialog" header="Novo Equipamento" :modal="true" :closable="true" style="width: 30rem">
       <div class="flex flex-column gap-3">

@@ -71,23 +71,73 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/planos-auditoria/novo',
+      name: 'plano-novo',
+      component: () => import('@/views/MontagemPlano.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/planos-auditoria/:id',
+      name: 'plano-detalhe',
+      component: () => import('@/views/PlanoDetalhe.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/planos-auditoria/:id/avaliacoes',
+      name: 'avaliacoes',
+      component: () => import('@/views/AvaliacaoRequisitos.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/planos-auditoria/:planoId/avaliacoes/:avaliacaoId',
+      name: 'avaliacao-detalhe',
+      component: () => import('@/views/AvaliacaoDetalhe.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/planos-auditoria/:id/relatorio-avaliacao',
+      name: 'relatorio-avaliacao',
+      component: () => import('@/views/RelatorioAvaliacao.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/nao-conformidades',
       name: 'nao-conformidades',
       component: () => import('@/views/NaoConformidadesList.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/admin/normas',
+      name: 'admin-normas',
+      component: () => import('@/views/admin/NormasList.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/normas/novo',
+      name: 'admin-normas-novo',
+      component: () => import('@/views/admin/NormasForm.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+      path: '/admin/normas/:id/editar',
+      name: 'admin-normas-editar',
+      component: () => import('@/views/admin/NormasForm.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
   ],
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, _from) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else if (to.meta.public && authStore.isAuthenticated && to.path !== '/login' && to.path !== '/register') {
-    next('/')
-  } else {
-    next()
+    return '/login'
+  }
+  if (to.meta.public && authStore.isAuthenticated && to.path !== '/login' && to.path !== '/register') {
+    return '/'
+  }
+  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    return '/'
   }
 })
 

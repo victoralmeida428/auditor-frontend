@@ -50,41 +50,43 @@ function formatBytes(bytes: number) {
 </script>
 
 <template>
-  <div class="flex flex-column gap-3">
+  <div class="flex flex-column gap-6">
     <div class="flex align-items-center justify-content-between">
-      <h1 class="text-xl font-bold m-0">Escopos</h1>
-      <Button label="Novo Escopo" icon="pi pi-plus" @click="router.push('/escopo/novo')" />
+      <h1 class="text-xl font-bold text-gray-900">Escopos</h1>
+      <Button label="Novo Escopo" icon="pi pi-plus" size="small" @click="router.push('/escopo/novo')" />
     </div>
 
-    <DataTable :value="escopos" :loading="loading" striped-rows paginator :rows="10" sort-field="created_at" :sort-order="-1">
-      <Column field="id" header="ID" sortable style="width: 5rem" />
-      <Column field="nome" header="Nome" sortable>
-        <template #body="{ data }">
-          <a class="cursor-pointer font-medium" @click="router.push(`/escopo/${data.id}`)">{{ data.nome }}</a>
-        </template>
-      </Column>
-      <Column field="situacao_acreditacao" header="Acreditação" sortable style="width: 10rem">
-        <template #body="{ data }">
-          <Tag
-            :value="data.situacao_acreditacao === 'acreditado' ? 'Acreditado' : 'Não Acreditado'"
-            :severity="data.situacao_acreditacao === 'acreditado' ? 'success' : 'info'"
-          />
-        </template>
-      </Column>
-      <Column field="created_at" header="Criado em" sortable style="width: 10rem">
-        <template #body="{ data }">
-          {{ new Date(data.created_at).toLocaleDateString('pt-BR') }}
-        </template>
-      </Column>
-      <Column header="Ações" style="width: 10rem">
-        <template #body="{ data }">
-          <div class="flex gap-1">
-            <Button icon="pi pi-eye" text rounded severity="info" v-tooltip.top="'Detalhe'" @click="router.push(`/escopo/${data.id}`)" />
-            <Button icon="pi pi-pencil" text rounded severity="warn" v-tooltip.top="'Editar'" @click="router.push(`/escopo/${data.id}/editar`)" />
-            <Button icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Excluir'" @click="confirmDelete(data)" />
-          </div>
-        </template>
-      </Column>
-    </DataTable>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <DataTable :value="escopos" :loading="loading" striped-rows paginator :rows="10" sort-field="created_at" :sort-order="-1">
+        <Column field="id" header="ID" sortable style="width: 5rem" />
+        <Column field="nome" header="Nome" sortable>
+          <template #body="{ data }">
+            <a class="cursor-pointer font-medium" @click="router.push(`/escopo/${data.id}`)">{{ data.nome }}</a>
+          </template>
+        </Column>
+        <Column field="situacao_acreditacao" header="Acreditação" sortable style="width: 10rem">
+          <template #body="{ data }">
+            <Tag
+              :value="data.situacao_acreditacao === 'acreditado' ? 'Acreditado' : 'Não Acreditado'"
+              :severity="data.situacao_acreditacao === 'acreditado' ? 'success' : 'info'"
+            />
+          </template>
+        </Column>
+        <Column field="created_at" header="Criado em" sortable style="width: 10rem">
+          <template #body="{ data }">
+            {{ new Date(data.created_at).toLocaleDateString('pt-BR') }}
+          </template>
+        </Column>
+        <Column header="Ações" style="width: 10rem">
+          <template #body="{ data }">
+            <div class="flex gap-1">
+              <Button icon="pi pi-eye" text rounded severity="info" v-tooltip.top="'Detalhe'" @click="router.push(`/escopo/${data.id}`)" />
+              <Button icon="pi pi-pencil" text rounded severity="warn" v-tooltip.top="'Editar'" @click="router.push(`/escopo/${data.id}/editar`)" />
+              <Button icon="pi pi-trash" text rounded severity="danger" v-tooltip.top="'Excluir'" @click="confirmDelete(data)" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
 </template>

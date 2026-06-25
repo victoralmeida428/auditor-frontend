@@ -31,9 +31,7 @@ onMounted(async () => {
       try {
         const ncRes = await api.get(`/planos-auditoria/${plano.id}/nao-conformidades`)
         ncCount += ncRes.data.length
-      } catch {
-        // endpoint pode não existir ainda
-      }
+      } catch {}
     }
     totalNcs.value = ncCount
   } catch {
@@ -43,44 +41,46 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-column gap-4">
-    <h1 class="text-xl font-bold m-0">Dashboard</h1>
-    <p class="text-color-secondary m-0">Bem-vindo, {{ authStore.userNome }}!</p>
+  <div class="flex flex-column gap-6">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-gray-500 mt-1">Bem-vindo, {{ authStore.userNome }}!</p>
+    </div>
     <div class="grid">
       <div class="col-12 md:col-6 lg:col-3">
-        <div class="card p-3 surface-ground border-round">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-all">
           <div class="flex align-items-center gap-2 mb-2">
-            <i class="pi pi-pencil text-blue-500 text-xl" />
-            <span class="font-medium">Escopos</span>
+            <i class="pi pi-pencil text-norma-600 text-xl" />
+            <span class="font-semibold text-gray-900">Escopos</span>
           </div>
-          <span class="text-2xl font-bold">{{ totalEscopos }}</span>
+          <span class="text-2xl font-bold text-gray-900">{{ totalEscopos }}</span>
         </div>
       </div>
       <div class="col-12 md:col-6 lg:col-3">
-        <div class="card p-3 surface-ground border-round">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-all">
           <div class="flex align-items-center gap-2 mb-2">
             <i class="pi pi-file text-green-500 text-xl" />
-            <span class="font-medium">Documentos</span>
+            <span class="font-semibold text-gray-900">Documentos</span>
           </div>
-          <span class="text-2xl font-bold">{{ totalDocumentos }}</span>
+          <span class="text-2xl font-bold text-gray-900">{{ totalDocumentos }}</span>
         </div>
       </div>
       <div class="col-12 md:col-6 lg:col-3">
-        <div class="card p-3 surface-ground border-round">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-all">
           <div class="flex align-items-center gap-2 mb-2">
             <i class="pi pi-list-check text-purple-500 text-xl" />
-            <span class="font-medium">Planos</span>
+            <span class="font-semibold text-gray-900">Planos</span>
           </div>
-          <span class="text-2xl font-bold">{{ totalPlanos }}</span>
+          <span class="text-2xl font-bold text-gray-900">{{ totalPlanos }}</span>
         </div>
       </div>
       <div class="col-12 md:col-6 lg:col-3">
-        <div class="card p-3 surface-ground border-round">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-all">
           <div class="flex align-items-center gap-2 mb-2">
             <i class="pi pi-exclamation-triangle text-orange-500 text-xl" />
-            <span class="font-medium">Não Conformidades</span>
+            <span class="font-semibold text-gray-900">Não Conformidades</span>
           </div>
-          <span class="text-2xl font-bold">{{ totalNcs }}</span>
+          <span class="text-2xl font-bold text-gray-900">{{ totalNcs }}</span>
         </div>
       </div>
     </div>

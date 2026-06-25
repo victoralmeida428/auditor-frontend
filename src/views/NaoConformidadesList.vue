@@ -5,8 +5,8 @@ const naoConformidades = ref([])
 </script>
 
 <template>
-  <div class="flex flex-column gap-3">
-    <h1 class="text-xl font-bold m-0">Não Conformidades</h1>
-    <p class="text-color-secondary">Listagem de NCs será implementada em breve.</p>
+  <div class="flex flex-column gap-6">
+    <h1 class="text-xl font-bold text-gray-900">Não Conformidades</h1>
+    <p class="text-gray-500 mt-1">Listagem de NCs será implementada em breve.</p>
   </div>
 </template>

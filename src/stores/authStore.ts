@@ -23,6 +23,8 @@ interface AuthResponse {
   empresa_id: number
   nome: string
   email: string
+  is_admin: boolean
+  roles: string[]
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -32,8 +34,11 @@ export const useAuthStore = defineStore('auth', () => {
   const empresaId = ref(Number(localStorage.getItem('empresa_id') || 0))
   const userNome = ref(localStorage.getItem('user_nome') || '')
   const userEmail = ref(localStorage.getItem('user_email') || '')
+  const userRoles = ref<string[]>(JSON.parse(localStorage.getItem('user_roles') || '[]'))
+  const isAdminFlag = ref(localStorage.getItem('is_admin') === 'true')
 
   const isAuthenticated = computed(() => !!accessToken.value)
+  const isAdmin = computed(() => isAdminFlag.value || userRoles.value.includes('admin'))
 
   function setTokens(data: AuthResponse) {
     accessToken.value = data.access_token
@@ -49,6 +54,8 @@ export const useAuthStore = defineStore('auth', () => {
     empresaId.value = data.empresa_id
     userNome.value = data.nome
     userEmail.value = data.email
+    userRoles.value = data.roles || []
+    isAdminFlag.value = data.is_admin
 
     localStorage.setItem('access_token', data.access_token)
     localStorage.setItem('refresh_token', data.refresh_token)
@@ -56,6 +63,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('empresa_id', String(data.empresa_id))
     localStorage.setItem('user_nome', data.nome)
     localStorage.setItem('user_email', data.email)
+    localStorage.setItem('user_roles', JSON.stringify(data.roles || []))
+    localStorage.setItem('is_admin', String(data.is_admin))
   }
 
   async function login(credentials: LoginRequest) {
@@ -85,6 +94,8 @@ export const useAuthStore = defineStore('auth', () => {
     empresaId.value = 0
     userNome.value = ''
     userEmail.value = ''
+    userRoles.value = []
+    isAdminFlag.value = false
 
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
@@ -92,20 +103,15 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('empresa_id')
     localStorage.removeItem('user_nome')
     localStorage.removeItem('user_email')
+    localStorage.removeItem('user_roles')
+    localStorage.removeItem('is_admin')
   }
 
   return {
-    accessToken,
-    refreshToken,
-    userId,
-    empresaId,
-    userNome,
-    userEmail,
-    isAuthenticated,
-    login,
-    register,
-    refreshAccessToken,
-    setTokens,
-    logout,
+    accessToken, refreshToken, userId, empresaId,
+    userNome, userEmail, userRoles,
+    isAuthenticated, isAdmin,
+    login, register, refreshAccessToken,
+    setTokens, logout,
   }
 })

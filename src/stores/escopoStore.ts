@@ -80,6 +80,14 @@ export interface Signatario {
   updated_at?: string
 }
 
+export interface NormaSugerida {
+  id: number
+  requisito_codigo: string
+  item_requisito: string | null
+  texto_exigencia: string
+  categoria: string | null
+}
+
 export const useEscopoStore = defineStore('escopo', () => {
   const escopos = ref<Escopo[]>([])
   const ensaios = ref<Ensaio[]>([])
@@ -241,6 +249,21 @@ export const useEscopoStore = defineStore('escopo', () => {
     return res.data
   }
 
+  async function sugerirNormas(escopoId: number, inlineData?: { escopo: any; ensaios: any[] }) {
+    const body = inlineData || {}
+    const res = await api.post(`/escopo/${escopoId}/sugerir-normas`, body)
+    return res.data as { sugeridas: NormaSugerida[]; vinculadas: number[] }
+  }
+
+  async function listNormasByEscopo(escopoId: number) {
+    const res = await api.get(`/escopo/${escopoId}/normas`)
+    return res.data as NormaSugerida[]
+  }
+
+  async function saveNormasSelecionadas(escopoId: number, normaIds: number[]) {
+    await api.post(`/escopo/${escopoId}/normas`, { norma_ids: normaIds })
+  }
+
   return {
     escopos, ensaios, amostras, grandezas, metodos,
     categoriasEnsaio, equipamentos, signatarios, loading,
@@ -255,5 +278,6 @@ export const useEscopoStore = defineStore('escopo', () => {
     listSignatarios, createSignatario, deleteSignatario,
     listSignatariosByEscopo, linkSignatarioToEscopo, unlinkSignatarioFromEscopo,
     listPrincipiosAnaliticos,
+    sugerirNormas, listNormasByEscopo, saveNormasSelecionadas,
   }
 })

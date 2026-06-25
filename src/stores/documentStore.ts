@@ -44,6 +44,14 @@ export const useDocumentStore = defineStore('documento', () => {
     return res.data.url as string
   }
 
+  async function deleteDocumento(id: number) {
+    await api.delete(`/documentos/${id}`)
+  }
+
+  async function reprocessarDocumento(id: number) {
+    await api.post(`/documentos/${id}/reprocessar`)
+  }
+
   function startPolling() {
     if (pollingInterval) return
     pollingInterval = setInterval(async () => {
@@ -65,6 +73,7 @@ export const useDocumentStore = defineStore('documento', () => {
   return {
     documentos, loading,
     listDocumentos, uploadDocumento, getDownloadUrl,
+    deleteDocumento, reprocessarDocumento,
     startPolling, stopPolling,
   }
 })
