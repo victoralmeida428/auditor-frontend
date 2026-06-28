@@ -152,6 +152,15 @@ describe('auditoriaStore', () => {
     expect(r.total_requisitos).toBe(3)
   })
 
+  it('avaliarComLLM posts and returns avaliacao', async () => {
+    const data = { id: 1, resultado: 'conforme' }
+    mockApi.post.mockResolvedValue({ data })
+    const store = useAuditoriaStore()
+    const r = await store.avaliarComLLM(1)
+    expect(r.id).toBe(1)
+    expect(mockApi.post).toHaveBeenCalledWith('/avaliacoes/1/avaliar-com-llm')
+  })
+
   it('loading ref is initially false', () => {
     const store = useAuditoriaStore()
     expect(store.loading).toBe(false)

@@ -196,6 +196,11 @@ export const useAuditoriaStore = defineStore('auditoria', () => {
     return res.data as AvaliacaoRequisito
   }
 
+  async function avaliarComLLM(avaliacaoId: number) {
+    const res = await api.post(`/avaliacoes/${avaliacaoId}/avaliar-com-llm`)
+    return res.data as AvaliacaoRequisito
+  }
+
   async function vincularDocumento(avaliacaoId: number, documentoId: number, tipo: string) {
     const res = await api.post(`/avaliacoes/${avaliacaoId}/vincular-documento`, {
       documento_id: documentoId,
@@ -216,6 +221,7 @@ export const useAuditoriaStore = defineStore('auditoria', () => {
     iniciar, concluir,
     criarAvaliacao, listAvaliacoes, getAvaliacao,
     updateCriterios, finalizarAvaliacao,
+    avaliarComLLM,
     vincularDocumento, getRelatorioAvaliacao,
   }
 })

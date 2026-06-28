@@ -12,6 +12,26 @@ export interface Norma {
   created_at: string
 }
 
+export interface NormaCriterio {
+  id: number
+  norma_id: number
+  criterio_numero: number
+  criterio_descricao: string
+  tipo_documento: string
+  created_at: string
+}
+
+export interface NormaComCriterios {
+  id: number
+  requisito_codigo: string
+  item_requisito: string | null
+  texto_exigencia: string
+  categoria: string | null
+  ativo: boolean
+  created_at: string
+  criterios: NormaCriterio[]
+}
+
 export const useNormaStore = defineStore('norma', () => {
   const normas = ref<Norma[]>([])
   const categorias = ref<string[]>([])
@@ -23,9 +43,20 @@ export const useNormaStore = defineStore('norma', () => {
     return res.data as Norma[]
   }
 
+  async function listAtivos(categoria?: string) {
+    const params = categoria ? { categoria } : {}
+    const res = await api.get('/normas', { params })
+    return res.data as Norma[]
+  }
+
   async function getById(id: number) {
     const res = await api.get(`/admin/normas/${id}`)
     return res.data as Norma
+  }
+
+  async function getCriterios(normaId: number) {
+    const res = await api.get(`/normas/${normaId}/criterios`)
+    return res.data as NormaComCriterios
   }
 
   async function create(data: Partial<Norma>) {
@@ -50,6 +81,6 @@ export const useNormaStore = defineStore('norma', () => {
 
   return {
     normas, categorias,
-    list, getById, create, update, remove, listCategorias,
+    list, listAtivos, getById, getCriterios, create, update, remove, listCategorias,
   }
 })

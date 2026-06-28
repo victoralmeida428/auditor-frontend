@@ -20,6 +20,7 @@ const criterios = ref<AvaliacaoCriterio[]>([])
 const loading = ref(true)
 const saving = ref(false)
 const finalizando = ref(false)
+const analisandoIA = ref(false)
 const resultadoNC = ref<string | null>(null)
 
 const showDocumentoDialog = ref(false)
@@ -68,6 +69,21 @@ async function handleSalvar() {
     toast.add({ severity: 'error', summary: e?.response?.data?.error || 'Erro ao salvar', life: 5000 })
   } finally {
     saving.value = false
+  }
+}
+
+async function handleAvaliarIA() {
+  analisandoIA.value = true
+  try {
+    const result = await store.avaliarComLLM(avaliacaoId.value)
+    const data = await store.getAvaliacao(avaliacaoId.value)
+    avaliacao.value = data.avaliacao
+    criterios.value = data.criterios
+    toast.add({ severity: 'success', summary: 'Análise concluída', detail: 'Revise os critérios preenchidos pela IA antes de finalizar', life: 4000 })
+  } catch (e: any) {
+    toast.add({ severity: 'error', summary: e?.response?.data?.error || 'Erro ao analisar com IA', life: 5000 })
+  } finally {
+    analisandoIA.value = false
   }
 }
 
@@ -152,6 +168,7 @@ async function handleVinculoConfirm(documentoId: number, tipo: string) {
 
     <div v-if="!avaliacao.resultado" class="flex gap-2 justify-content-end flex-wrap">
       <Button label="Vincular Documento" icon="pi pi-file" severity="secondary" @click="abrirVincularDocumento" />
+      <Button label="Avaliar com IA" :loading="analisandoIA" icon="pi pi-cog" severity="info" @click="handleAvaliarIA" />
       <Button label="Salvar Rascunho" :loading="saving" icon="pi pi-save" severity="secondary" @click="handleSalvar" />
       <Button label="Finalizar Avaliação" :loading="finalizando" icon="pi pi-check" @click="handleFinalizar" />
     </div>

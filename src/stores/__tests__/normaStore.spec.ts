@@ -71,4 +71,28 @@ describe('normaStore', () => {
     expect(r).toEqual(['ISO 17025', 'DICLA'])
     expect(store.categorias).toEqual(['ISO 17025', 'DICLA'])
   })
+
+  it('listAtivos fetches from public endpoint without categoria', async () => {
+    mockApi.get.mockResolvedValue({ data: [{ id: 1, requisito_codigo: '4.1' }] })
+    const store = useNormaStore()
+    const r = await store.listAtivos()
+    expect(r).toHaveLength(1)
+    expect(mockApi.get).toHaveBeenCalledWith('/normas', { params: {} })
+  })
+
+  it('listAtivos fetches from public endpoint with categoria', async () => {
+    mockApi.get.mockResolvedValue({ data: [] })
+    const store = useNormaStore()
+    await store.listAtivos('Sistema de Gestão')
+    expect(mockApi.get).toHaveBeenCalledWith('/normas', { params: { categoria: 'Sistema de Gestão' } })
+  })
+
+  it('getCriterios fetches from public endpoint', async () => {
+    mockApi.get.mockResolvedValue({ data: { id: 1, requisito_codigo: '4.1', criterios: [{ criterio_numero: 1, criterio_descricao: 'Compromisso formal' }] } })
+    const store = useNormaStore()
+    const r = await store.getCriterios(1)
+    expect(r.requisito_codigo).toBe('4.1')
+    expect(r.criterios).toHaveLength(1)
+    expect(mockApi.get).toHaveBeenCalledWith('/normas/1/criterios')
+  })
 })

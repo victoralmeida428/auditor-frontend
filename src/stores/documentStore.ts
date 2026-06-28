@@ -46,6 +46,7 @@ export const useDocumentStore = defineStore('documento', () => {
 
   async function deleteDocumento(id: number) {
     await api.delete(`/documentos/${id}`)
+    documentos.value = documentos.value.filter(d => d.id !== id)
   }
 
   async function reprocessarDocumento(id: number) {

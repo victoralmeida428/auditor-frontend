@@ -95,7 +95,6 @@ function confirmDelete(doc: Documento) {
     accept: async () => {
       try {
         await store.deleteDocumento(doc.id)
-        documentos.value = documentos.value.filter(d => d.id !== doc.id)
         toast.add({ severity: 'success', summary: 'Documento removido', life: 3000 })
       } catch {
         toast.add({ severity: 'error', summary: 'Erro ao excluir documento', life: 3000 })
