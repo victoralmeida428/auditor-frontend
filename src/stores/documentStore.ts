@@ -19,7 +19,7 @@ export interface Documento {
 export const useDocumentStore = defineStore('documento', () => {
   const documentos = ref<Documento[]>([])
   const loading = ref(false)
-  let pollingInterval: ReturnType<typeof setInterval> | null = null
+  let eventSource: EventSource | null = null
 
   async function listDocumentos() {
     const res = await api.get('/documentos')
@@ -52,21 +52,40 @@ export const useDocumentStore = defineStore('documento', () => {
     await api.post(`/documentos/${id}/reprocessar`)
   }
 
-  function startPolling() {
-    if (pollingInterval) return
-    pollingInterval = setInterval(async () => {
-      const hasProcessing = documentos.value.some(
-        (d) => d.status === 'pending' || d.status === 'processing',
-      )
-      if (!hasProcessing) return
-      await listDocumentos()
-    }, 5000)
+  function getToken(): string | null {
+    return localStorage.getItem('access_token')
   }
 
-  function stopPolling() {
-    if (pollingInterval) {
-      clearInterval(pollingInterval)
-      pollingInterval = null
+  function connectSSE() {
+    if (eventSource) return
+    const token = getToken()
+    if (!token) return
+
+    const baseURL = import.meta.env.VITE_API_URL || '/api'
+    eventSource = new EventSource(`${baseURL}/sse/documentos?token=${token}`)
+
+    eventSource.addEventListener('document.updated', (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        const idx = documentos.value.findIndex((d) => d.id === data.document_id)
+        if (idx !== -1) {
+          documentos.value[idx] = {
+            ...documentos.value[idx],
+            status: data.status,
+            updated_at: data.updated_at,
+          }
+          documentos.value = [...documentos.value]
+        }
+      } catch {
+        // ignore parse errors
+      }
+    })
+  }
+
+  function disconnectSSE() {
+    if (eventSource) {
+      eventSource.close()
+      eventSource = null
     }
   }
 
@@ -74,6 +93,6 @@ export const useDocumentStore = defineStore('documento', () => {
     documentos, loading,
     listDocumentos, uploadDocumento, getDownloadUrl,
     deleteDocumento, reprocessarDocumento,
-    startPolling, stopPolling,
+    connectSSE, disconnectSSE,
   }
 })

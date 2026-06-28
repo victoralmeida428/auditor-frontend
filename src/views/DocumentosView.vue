@@ -3,28 +3,37 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { useDocumentStore, type Documento } from '@/stores/documentStore'
+import { storeToRefs } from 'pinia'
 import api from '@/services/api'
+import ResponsiveTable, { type ResponsiveColumn } from '@/components/common/ResponsiveTable.vue'
 
 const store = useDocumentStore()
 const toast = useToast()
 const confirm = useConfirm()
 
-const documentos = ref<Documento[]>([])
-const loading = ref(false)
+const { documentos, loading } = storeToRefs(store)
 const uploading = ref(false)
+
+const columns: ResponsiveColumn[] = [
+  { field: 'nome_original', header: 'Nome' },
+  { field: 'tipo_arquivo', header: 'Tipo' },
+  { field: 'tamanho_bytes', header: 'Tamanho' },
+  { field: 'status', header: 'Status' },
+  { field: 'created_at', header: 'Enviado em' },
+]
 
 onMounted(async () => {
   loading.value = true
   try {
-    documentos.value = await store.listDocumentos()
+    await store.listDocumentos()
   } finally {
     loading.value = false
   }
-  store.startPolling()
+  store.connectSSE()
 })
 
 onUnmounted(() => {
-  store.stopPolling()
+  store.disconnectSSE()
 })
 
 async function onUpload(event: any) {
@@ -34,7 +43,7 @@ async function onUpload(event: any) {
     for (const file of files) {
       await store.uploadDocumento(file)
     }
-    documentos.value = await store.listDocumentos()
+    await store.listDocumentos()
     toast.add({ severity: 'success', summary: `${files.length} arquivo(s) enviado(s)`, life: 3000 })
   } catch {
     toast.add({ severity: 'error', summary: 'Erro no upload', life: 3000 })
@@ -87,7 +96,7 @@ function confirmDelete(doc: Documento) {
       try {
         await store.deleteDocumento(doc.id)
         documentos.value = documentos.value.filter(d => d.id !== doc.id)
-        toast.add({ severity: 'success', summary: 'Documento removido', life: 2000 })
+        toast.add({ severity: 'success', summary: 'Documento removido', life: 3000 })
       } catch {
         toast.add({ severity: 'error', summary: 'Erro ao excluir documento', life: 3000 })
       }
@@ -99,13 +108,14 @@ const statusSeverity: Record<string, 'info' | 'warn' | 'success' | 'danger'> = {
   pending: 'info',
   processing: 'warn',
   completed: 'success',
+  processed: 'success',
   failed: 'danger',
 }
 </script>
 
 <template>
-  <div class="flex flex-column gap-6">
-    <h1 class="text-xl font-bold text-gray-900">Documentos</h1>
+  <div class="flex flex-column gap-4 md:gap-6">
+    <h1 class="text-lg md:text-xl font-bold text-gray-900">Documentos</h1>
 
     <FileUpload
       name="file"
@@ -125,51 +135,50 @@ const statusSeverity: Record<string, 'info' | 'warn' | 'success' | 'danger'> = {
     </FileUpload>
 
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <DataTable :value="documentos" :loading="loading" striped-rows paginator :rows="10" sort-field="created_at" :sort-order="-1">
-        <Column field="nome_original" header="Nome" sortable />
-        <Column field="tipo_arquivo" header="Tipo" style="width: 6rem" />
-        <Column field="tamanho_bytes" header="Tamanho" style="width: 8rem" sortable>
-          <template #body="{ data }">
-            {{ formatBytes(data.tamanho_bytes) }}
-          </template>
-        </Column>
-        <Column field="status" header="Status" style="width: 8rem" sortable>
-          <template #body="{ data }">
-            <Tag :value="data.status" :severity="statusSeverity[data.status] || 'info'" />
-          </template>
-        </Column>
-        <Column field="created_at" header="Enviado em" style="width: 10rem" sortable>
-          <template #body="{ data }">
-            {{ new Date(data.created_at).toLocaleString('pt-BR') }}
-          </template>
-        </Column>
-        <Column header="" style="width: 10rem">
-          <template #body="{ data }">
-            <div class="flex gap-1">
-              <Button
-                icon="pi pi-download"
-                text rounded severity="info"
-                v-tooltip.top="'Download'"
-                @click="download(data)"
-                :disabled="data.status !== 'processed'"
-              />
-              <Button
-                icon="pi pi-refresh"
-                text rounded severity="warn"
-                v-tooltip.top="'Reprocessar'"
-                @click="reprocessar(data)"
-                :disabled="data.status === 'pending' || data.status === 'processing'"
-              />
-              <Button
-                icon="pi pi-trash"
-                text rounded severity="danger"
-                v-tooltip.top="'Excluir'"
-                @click="confirmDelete(data)"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+      <ResponsiveTable
+        :value="documentos"
+        :loading="loading"
+        :columns="columns"
+        paginator
+        :rows="10"
+        sort-field="created_at"
+        :sort-order="-1"
+        striped-rows
+      >
+        <template #body-tamanho_bytes="{ data }">
+          {{ formatBytes(data.tamanho_bytes) }}
+        </template>
+        <template #body-status="{ data }">
+          <Tag :value="data.status" :severity="statusSeverity[data.status] || 'info'" />
+        </template>
+        <template #body-created_at="{ data }">
+          {{ new Date(data.created_at).toLocaleString('pt-BR') }}
+        </template>
+        <template #actions="{ data }">
+          <div class="flex gap-1">
+            <Button
+              icon="pi pi-download"
+              text rounded severity="info"
+              v-tooltip.top="'Download'"
+              @click="download(data)"
+              :disabled="data.status !== 'processed'"
+            />
+            <Button
+              icon="pi pi-refresh"
+              text rounded severity="warn"
+              v-tooltip.top="'Reprocessar'"
+              @click="reprocessar(data)"
+              :disabled="data.status === 'pending' || data.status === 'processing'"
+            />
+            <Button
+              icon="pi pi-trash"
+              text rounded severity="danger"
+              v-tooltip.top="'Excluir'"
+              @click="confirmDelete(data)"
+            />
+          </div>
+        </template>
+      </ResponsiveTable>
     </div>
   </div>
 </template>

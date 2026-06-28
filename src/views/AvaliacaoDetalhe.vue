@@ -121,7 +121,7 @@ async function handleVinculoConfirm(documentoId: number, tipo: string) {
     <i class="pi pi-spin pi-spinner text-3xl" />
   </div>
 
-  <div v-else-if="avaliacao" class="flex flex-column gap-6" style="max-width: 50rem">
+  <div v-else-if="avaliacao" class="flex flex-column gap-4 md:gap-6 w-full max-w-2xl mx-auto px-0 md:px-4">
     <div class="flex align-items-center justify-content-between">
       <div>
         <h1 class="text-xl font-bold text-gray-900">{{ avaliacao.requisito_codigo }} — {{ avaliacao.requisito_nome }}</h1>
@@ -150,7 +150,7 @@ async function handleVinculoConfirm(documentoId: number, tipo: string) {
       </div>
     </div>
 
-    <div v-if="!avaliacao.resultado" class="flex gap-2 justify-content-end">
+    <div v-if="!avaliacao.resultado" class="flex gap-2 justify-content-end flex-wrap">
       <Button label="Vincular Documento" icon="pi pi-file" severity="secondary" @click="abrirVincularDocumento" />
       <Button label="Salvar Rascunho" :loading="saving" icon="pi pi-save" severity="secondary" @click="handleSalvar" />
       <Button label="Finalizar Avaliação" :loading="finalizando" icon="pi pi-check" @click="handleFinalizar" />

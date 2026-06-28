@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdminFlag = ref(localStorage.getItem('is_admin') === 'true')
 
   const isAuthenticated = computed(() => !!accessToken.value)
-  const isAdmin = computed(() => isAdminFlag.value || userRoles.value.includes('admin'))
+  const isAdmin = computed(() => isAdminFlag.value)
 
   function setTokens(data: AuthResponse) {
     accessToken.value = data.access_token

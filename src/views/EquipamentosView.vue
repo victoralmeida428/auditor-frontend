@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useEscopoStore, type EquipamentoCritico } from '@/stores/escopoStore'
 import { useToast } from 'primevue/usetoast'
+import ResponsiveTable, { type ResponsiveColumn } from '@/components/common/ResponsiveTable.vue'
 
 const store = useEscopoStore()
 const toast = useToast()
@@ -12,6 +13,12 @@ const loading = ref(true)
 const showDialog = ref(false)
 const form = ref({ nome: '', modelo: '', identificacao_interna: '' })
 const saving = ref(false)
+
+const columns: ResponsiveColumn[] = [
+  { field: 'nome', header: 'Nome', sortable: true },
+  { field: 'modelo', header: 'Modelo' },
+  { field: 'identificacao_interna', header: 'Identificação Interna' },
+]
 
 onMounted(async () => {
   try {
@@ -54,34 +61,33 @@ async function handleDelete(id: number) {
 </script>
 
 <template>
-  <div class="flex flex-column gap-6">
+  <div class="flex flex-column gap-4 md:gap-6">
     <div class="flex align-items-center justify-content-between">
-      <h1 class="text-xl font-bold text-gray-900">Equipamentos</h1>
+      <h1 class="text-lg md:text-xl font-bold text-gray-900">Equipamentos</h1>
       <Button label="Novo Equipamento" icon="pi pi-plus" size="small" @click="showDialog = true" />
     </div>
 
     <div v-if="loading" class="flex justify-content-center">
-      <i class="pi pi-spin pi-spinner text-3xl" />
+      <i class="pi pi-spin pi-spinner text-2xl" />
     </div>
 
     <div v-else class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-      <DataTable :value="equipamentos" striped-rows paginator :rows="15">
-        <Column field="nome" header="Nome" sortable />
-        <Column field="modelo" header="Modelo">
-          <template #body="{ data }">{{ data.modelo || '-' }}</template>
-        </Column>
-        <Column field="identificacao_interna" header="Identificação Interna">
-          <template #body="{ data }">{{ data.identificacao_interna || '-' }}</template>
-        </Column>
-        <Column header="" style="width: 4rem">
-          <template #body="{ data }">
-            <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data.id)" />
-          </template>
-        </Column>
-      </DataTable>
+      <ResponsiveTable
+        :value="equipamentos"
+        :columns="columns"
+        paginator
+        :rows="15"
+        striped-rows
+      >
+        <template #body-modelo="{ data }">{{ data.modelo || '-' }}</template>
+        <template #body-identificacao_interna="{ data }">{{ data.identificacao_interna || '-' }}</template>
+        <template #actions="{ data }">
+          <Button icon="pi pi-trash" text rounded severity="danger" @click="handleDelete(data.id)" />
+        </template>
+      </ResponsiveTable>
     </div>
 
-    <Dialog v-model:visible="showDialog" header="Novo Equipamento" :modal="true" :closable="true" style="width: 30rem">
+    <Dialog v-model:visible="showDialog" header="Novo Equipamento" :modal="true" :closable="true" style="width: 30rem" :breakpoints="{ '640px': '95vw' }">
       <div class="flex flex-column gap-3">
         <div>
           <label class="block mb-1 text-sm font-medium">Nome *</label>

@@ -24,7 +24,7 @@ function handleConfirm() {
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" header="Adicionar Ensaio ao Grupo" :modal="true" style="width: 30rem" @update:visible="visible ? $emit('cancel') : ''">
+  <Dialog v-model:visible="visible" header="Adicionar Ensaio ao Grupo" :modal="true" style="width: 30rem" :breakpoints="{ '640px': '95vw' }" @update:visible="visible ? $emit('cancel') : ''">
     <div class="flex flex-column gap-3">
       <label class="block mb-1 text-sm font-medium">Selecione o Ensaio</label>
       <Select v-model="selectedEnsaioId" :options="ensaiosDisponiveis" option-label="nome" option-value="id" class="w-full" />

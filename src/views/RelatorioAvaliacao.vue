@@ -38,7 +38,7 @@ function statusSeverity(status: string) {
     <i class="pi pi-spin pi-spinner text-3xl" />
   </div>
 
-  <div v-else-if="relatorio" class="flex flex-column gap-6" style="max-width: 50rem">
+  <div v-else-if="relatorio" class="flex flex-column gap-4 md:gap-6 w-full max-w-2xl mx-auto px-0 md:px-4">
     <div class="flex align-items-center justify-content-between">
       <div>
         <h1 class="text-xl font-bold text-gray-900">Relatório de Avaliação</h1>

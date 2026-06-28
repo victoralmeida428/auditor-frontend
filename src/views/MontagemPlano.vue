@@ -153,10 +153,10 @@ function goToPlano() {
 </script>
 
 <template>
-  <div class="flex flex-column gap-6" style="max-width: 50rem">
-    <h1 class="text-xl font-bold text-gray-900">Novo Plano de Auditoria</h1>
+  <div class="flex flex-column gap-4 md:gap-6 w-full max-w-2xl mx-auto px-0 md:px-4">
+    <h1 class="text-lg md:text-xl font-bold text-gray-900">Novo Plano de Auditoria</h1>
 
-    <Steps :model="['Dados do Plano', 'Montagem', 'Resultado'].map(s => ({ label: s }))" :active-step="step" class="mb-2" />
+    <Steps :model="['Dados do Plano', 'Montagem', 'Resultado'].map(s => ({ label: s }))" :active-step="step" class="mb-2 overflow-x-auto" />
 
     <div v-if="step === 0" class="flex flex-column gap-3">
       <div>
@@ -181,14 +181,14 @@ function goToPlano() {
         <InputText v-model="form.titulo" class="w-full" placeholder="Ex: Auditoria Anual 2026" />
       </div>
       <div class="grid">
-        <div class="col-6">
+        <div class="col-12 md:col-6">
           <label class="block mb-1 text-sm font-medium">Tipo de Montagem</label>
           <Select v-model="form.tipo_montagem" :options="[
             { label: 'Automática', value: 'auto' },
             { label: 'Manual', value: 'manual' },
           ]" option-label="label" option-value="value" class="w-full" />
         </div>
-        <div class="col-6">
+        <div class="col-12 md:col-6">
           <label class="block mb-1 text-sm font-medium">Tipo de Auditoria</label>
           <Select v-model="form.tipo_auditoria" :options="[
             { label: 'Primeira Auditoria', value: 'primeira' },
@@ -198,11 +198,11 @@ function goToPlano() {
         </div>
       </div>
       <div class="grid">
-        <div class="col-6">
+        <div class="col-12 md:col-6">
           <label class="block mb-1 text-sm font-medium">Data de Início</label>
           <Calendar v-model="form.data_inicio" date-format="dd/mm/yy" class="w-full" />
         </div>
-        <div class="col-6">
+        <div class="col-12 md:col-6">
           <label class="block mb-1 text-sm font-medium">Data de Fim</label>
           <Calendar v-model="form.data_fim" date-format="dd/mm/yy" class="w-full" />
         </div>
@@ -276,11 +276,11 @@ function goToPlano() {
 
     <RiskWarningModal v-if="showRiskWarning" @confirm="acceptRisk" @cancel="showRiskWarning = false" />
 
-    <div class="flex gap-2 justify-content-between">
+    <div class="flex gap-2 justify-content-between flex-wrap">
       <div>
         <Button v-if="step > 0" type="button" label="Anterior" icon="pi pi-chevron-left" severity="secondary" @click="step--" />
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap">
         <Button type="button" label="Cancelar" severity="secondary" @click="router.push('/planos-auditoria')" />
         <Button v-if="step === 0" label="Próximo" icon="pi pi-chevron-right" icon-pos="right" @click="step++" :disabled="!form.escopo_id || !form.titulo || (form.tipo_montagem === 'auto' && !gruposCarregados)" />
         <Button v-if="step === 1" :loading="loading" label="Gerar Plano" icon="pi pi-cog" @click="handleMontar" />

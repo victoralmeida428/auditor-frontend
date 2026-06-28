@@ -72,16 +72,16 @@ async function handleSave() {
     <i class="pi pi-spin pi-spinner text-3xl" />
   </div>
 
-  <div v-else class="flex flex-column gap-6" style="max-width: 40rem">
-    <h1 class="text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Norma' : 'Nova Norma' }}</h1>
+  <div v-else class="flex flex-column gap-4 md:gap-6 w-full max-w-2xl mx-auto px-0 md:px-4">
+    <h1 class="text-lg md:text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Norma' : 'Nova Norma' }}</h1>
 
     <div class="flex flex-column gap-3">
       <div class="grid">
-        <div class="col-6">
+        <div class="col-12 md:col-6">
           <label class="block mb-1 text-sm font-medium">Código do Requisito *</label>
           <InputText v-model="form.requisito_codigo" class="w-full" placeholder="Ex: 4.1, ISO 9001:2015" />
         </div>
-        <div class="col-6">
+        <div class="col-12 md:col-6">
           <label class="block mb-1 text-sm font-medium">Item</label>
           <InputText v-model="form.item_requisito" class="w-full" placeholder="Ex: 4.1.1" />
         </div>

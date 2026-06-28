@@ -32,9 +32,9 @@ async function handleRegister() {
 </script>
 
 <template>
-  <div class="flex align-items-center justify-content-center min-h-screen" style="background: linear-gradient(to bottom, #ffffff, #f9fafb)">
+  <div class="flex align-items-center justify-content-center min-h-screen px-4" style="background: linear-gradient(to bottom, #ffffff, #f9fafb)">
     <div class="w-full" style="max-width: 32rem">
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
         <div class="text-center mb-6">
           <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-norma-600 text-xl font-bold text-white mb-4">iNorma</span>
           <h1 class="text-xl font-bold text-gray-900">Cadastro</h1>

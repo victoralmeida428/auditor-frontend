@@ -171,20 +171,20 @@ async function handleDeleteSignatario(id: number) {
       <h2 class="text-base font-semibold m-0 mb-2">Ensaios ({{ (ensaios?.length ?? 0) }})</h2>
       <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <DataTable :value="ensaios" striped-rows paginator :rows="10">
-        <Column field="nome" header="Nome" sortable />
-        <Column header="Matriz" sortable>
-          <template #body="{ data }">{{ data.matriz || '-' }}</template>
-        </Column>
-        <Column field="tipo_metodo" header="Tipo Método">
-          <template #body="{ data }">
-            <Tag :value="data.tipo_metodo || '-'" :severity="data.tipo_metodo === 'normalizado' ? 'success' : 'warn'" />
-          </template>
-        </Column>
-        <Column header="Acreditado" style="width: 8rem">
-          <template #body="{ data }">
-            <Tag :value="data.acreditado ? 'Sim' : 'Não'" :severity="data.acreditado ? 'success' : 'secondary'" />
-          </template>
-        </Column>
+          <Column field="nome" header="Nome" sortable />
+          <Column header="Matriz" sortable>
+            <template #body="{ data }">{{ data.matriz || '-' }}</template>
+          </Column>
+          <Column field="tipo_metodo" header="Tipo Método">
+            <template #body="{ data }">
+              <Tag :value="data.tipo_metodo || '-'" :severity="data.tipo_metodo === 'normalizado' ? 'success' : 'warn'" />
+            </template>
+          </Column>
+          <Column header="Acreditado" style="width: 8rem">
+            <template #body="{ data }">
+              <Tag :value="data.acreditado ? 'Sim' : 'Não'" :severity="data.acreditado ? 'success' : 'secondary'" />
+            </template>
+          </Column>
         </DataTable>
       </div>
     </div>

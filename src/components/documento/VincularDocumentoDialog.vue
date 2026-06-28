@@ -23,7 +23,7 @@ function handleConfirm() {
 </script>
 
 <template>
-  <Dialog v-model:visible="visible" header="Vincular Documento como Evidência" :modal="true" style="width: 30rem" @update:visible="!visible ? $emit('cancel') : ''">
+  <Dialog v-model:visible="visible" header="Vincular Documento como Evidência" :modal="true" style="width: 30rem" :breakpoints="{ '640px': '95vw' }" @update:visible="!visible ? $emit('cancel') : ''">
     <div class="flex flex-column gap-3">
       <div>
         <label class="block mb-1 text-sm font-medium">Documento</label>

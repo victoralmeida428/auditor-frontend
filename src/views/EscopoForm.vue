@@ -154,10 +154,10 @@ const steps = ['Dados Básicos', 'Ensaios', 'Sugestão de Normas', 'Revisão']
 </script>
 
 <template>
-  <div class="flex flex-column gap-6" style="max-width: 50rem">
-    <h1 class="text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Escopo' : 'Novo Escopo' }}</h1>
+  <div class="flex flex-column gap-4 md:gap-6 w-full max-w-2xl mx-auto px-0 md:px-4">
+    <h1 class="text-lg md:text-xl font-bold text-gray-900">{{ isEditing ? 'Editar Escopo' : 'Novo Escopo' }}</h1>
 
-    <Steps :model="steps.map(s => ({ label: s }))" :active-step="step" class="mb-2" @update:active-step="onStepChange" />
+    <Steps :model="steps.map(s => ({ label: s }))" :active-step="step" class="mb-2 overflow-x-auto" @update:active-step="onStepChange" />
 
     <!-- Step 0: Dados Básicos -->
     <div v-if="step === 0" class="flex flex-column gap-3">
@@ -195,15 +195,15 @@ const steps = ['Dados Básicos', 'Ensaios', 'Sugestão de Normas', 'Revisão']
         <h2 class="text-base font-semibold m-0">Ensaios</h2>
 
         <div class="grid formgrid">
-          <div class="col-6">
+          <div class="col-12 md:col-6">
             <label class="block mb-1 text-sm font-medium">Nome do Ensaio</label>
             <InputText v-model="novoEnsaio.nome" class="w-full" placeholder="Ex: pH em Água" />
           </div>
-          <div class="col-6">
+          <div class="col-12 md:col-6">
             <label class="block mb-1 text-sm font-medium">Matriz</label>
             <InputText v-model="novoEnsaio.matriz" class="w-full" placeholder="Ex: Água" />
           </div>
-          <div class="col-6">
+          <div class="col-12 md:col-6">
             <label class="block mb-1 text-sm font-medium">Princípio Analítico</label>
             <Select
               v-model="novoEnsaio.principio_analitico_id"
@@ -214,7 +214,7 @@ const steps = ['Dados Básicos', 'Ensaios', 'Sugestão de Normas', 'Revisão']
               show-clear
             />
           </div>
-          <div class="col-6">
+          <div class="col-12 md:col-6">
             <label class="block mb-1 text-sm font-medium">Tipo de Método</label>
             <Select
               v-model="novoEnsaio.tipo_metodo"
@@ -288,10 +288,10 @@ const steps = ['Dados Básicos', 'Ensaios', 'Sugestão de Normas', 'Revisão']
       <h2 class="text-base font-semibold m-0">Revisão</h2>
       <div class="card bg-white rounded-xl border border-gray-100 shadow-sm p-3 border-round">
         <div class="grid">
-          <div class="col-6"><strong>Nome:</strong> {{ form.nome }}</div>
-          <div class="col-6"><strong>Descrição:</strong> {{ form.descricao || '-' }}</div>
-          <div class="col-6"><strong>Acreditação:</strong> {{ form.situacao_acreditacao === 'acreditado' ? 'Sim' : 'Não' }}</div>
-          <div class="col-6" v-if="form.numero_acreditacao"><strong>Nº Acreditação:</strong> {{ form.numero_acreditacao }}</div>
+          <div class="col-12 md:col-6"><strong>Nome:</strong> {{ form.nome }}</div>
+          <div class="col-12 md:col-6"><strong>Descrição:</strong> {{ form.descricao || '-' }}</div>
+          <div class="col-12 md:col-6"><strong>Acreditação:</strong> {{ form.situacao_acreditacao === 'acreditado' ? 'Sim' : 'Não' }}</div>
+          <div class="col-12 md:col-6" v-if="form.numero_acreditacao"><strong>Nº Acreditação:</strong> {{ form.numero_acreditacao }}</div>
         </div>
       </div>
       <h3 class="text-md font-medium m-0">Ensaios ({{ pendingEnsaios.length }})</h3>
@@ -311,7 +311,7 @@ const steps = ['Dados Básicos', 'Ensaios', 'Sugestão de Normas', 'Revisão']
       <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
     </div>
 
-    <div class="flex gap-2 justify-content-between">
+    <div class="flex gap-2 justify-content-between flex-wrap">
       <div>
         <Button v-if="step > 0" type="button" label="Anterior" icon="pi pi-chevron-left" severity="secondary" @click="step--" />
       </div>
